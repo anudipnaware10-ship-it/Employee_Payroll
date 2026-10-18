@@ -120,7 +120,7 @@ void dll::insertbet(){
 		p->next=NULL;
 		p->prev=NULL;
 	}else{
-		while(q->data!=val){
+		while(q->empid!=val){
 			q=q->next;
 		}
 		p->next=q->next;
@@ -175,7 +175,7 @@ int dll::search(){
 			fast=fast->prev;//moves fast 1 step backward
 		}
 		node *mid=slow;
-		if(mid->empid==key){
+		if(mid->empid==val){
 			cout<<"Emplyoee found successfully\n";
 			cout<<"Id="<<mid->empid<<endl;
 			cout<<"Name="<<mid->name<<endl;
@@ -183,13 +183,13 @@ int dll::search(){
 			cout<<"Designation="<<mid->des<<emdl;
 			cout<<"Salary="<<mid->sal<<endl;
 			return mid->empid;
-		}else if(mid->empid<key){
+		}else if(mid->empid<val){
 			low=mid->next;
 		}else{
 			high=mid->prev;
 		}
 	}
-	cout<<"Emplyoee with id "<<key<<"not found.\n";
+	cout<<"Emplyoee with id "<<val<<"not found.\n";
 	return -1;
 }
 int main(){
