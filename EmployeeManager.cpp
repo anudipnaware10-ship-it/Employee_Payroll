@@ -1,38 +1,45 @@
 
-#include "../include/EmployeeManager.h"
+#include "EmployeeManager.h"
+#include "FileHandler.h"
+
 #include <iostream>
+#include <vector>
+
 using namespace std;
 
-EmployeeManager::EmployeeManager() {
-}
+EmployeeManager::EmployeeManager() {}
 
+// Add employee
 void EmployeeManager::addEmployee(Employee employee) {
-    employees.insert(employee);
-    employeeMap[employee.id] = employees.getHead();
+    if (employeeMap.find(employee.id) != employeeMap.end()) {
+        cout << "Employee ID already exists!\n";
+        return;
+    }
+
+    Node* newNode = employees.insert(employee);
+    employeeMap[employee.id] = newNode;
+
     cout << "Employee added successfully!\n";
+    saveToFile();
 }
 
+// Search employee
 Node* EmployeeManager::searchEmployee(int id) {
     auto it = employeeMap.find(id);
 
     if (it != employeeMap.end()) {
-        Node* current = employees.getHead();
-
-        while (current != nullptr) {
-            if (current->data.id == id) {
-                return current;
-            }
-            current = current->next;
-        }
+        return it->second;
     }
 
     return nullptr;
 }
 
+// Display employees
 void EmployeeManager::displayEmployees() {
     employees.display();
 }
 
+// Update employee
 void EmployeeManager::updateEmployee(int id) {
     Node* employee = searchEmployee(id);
 
@@ -54,31 +61,49 @@ void EmployeeManager::updateEmployee(int id) {
     cin >> employee->data.salary;
 
     cout << "Employee updated successfully!\n";
+    saveToFile();
 }
 
+// Delete employee
 void EmployeeManager::deleteEmployee(int id) {
+    if (employeeMap.find(id) == employeeMap.end()) {
+        cout << "Employee not found!\n";
+        return;
+    }
+
+    if (employees.remove(id)) {
+        employeeMap.erase(id);
+
+        cout << "Employee deleted successfully!\n";
+        saveToFile();
+    }
+}
+
+// Load employee records from file
+void EmployeeManager::loadFromFile() {
+    vector<Employee> savedEmployees = FileHandler::loadEmployees();
+
+    for (const Employee& emp : savedEmployees) {
+        if (employeeMap.find(emp.id) == employeeMap.end()) {
+            Node* newNode = employees.insert(emp);
+            employeeMap[emp.id] = newNode;
+        }
+    }
+
+    cout << "Employee records loaded: "
+         << employeeMap.size() << "\n";
+}
+
+// Save employee records to file
+void EmployeeManager::saveToFile() {
+    vector<Employee> allEmployees;
+
     Node* current = employees.getHead();
-    Node* previous = nullptr;
 
     while (current != nullptr) {
-        if (current->data.id == id) {
-            if (previous == nullptr) {
-                cout << "Deleting the head node requires "
-                     << "a LinkedList delete method.\n";
-                return;
-            }
-
-            previous->next = current->next;
-            delete current;
-            employeeMap.erase(id);
-
-            cout << "Employee deleted successfully!\n";
-            return;
-        }
-
-        previous = current;
+        allEmployees.push_back(current->data);
         current = current->next;
     }
 
-    cout << "Employee not found!\n";
+    FileHandler::saveEmployees(allEmployees);
 }
